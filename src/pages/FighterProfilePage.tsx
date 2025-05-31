@@ -44,6 +44,7 @@ export function FighterProfile() {
   const [records, setRecords] = useState<FighterRecords[]>([]);
   const [fights, setFights] = useState<Fight[]>([]);
   const [opponents, setOpponents] = useState<Fighter[]>([]);
+  const [showAllFights, setShowAllFights] = useState(false);
 
   useEffect(() => {
     getFighters(fighterId);
@@ -109,6 +110,7 @@ export function FighterProfile() {
       if (error) {
         console.error("Error fetching fights:", error);
       } else {
+        console.log(data);
         // Add a new field to indicate the role of the current fighter
         const fightsWithRole = data.map((fight) => {
           if (fight.id_fighter_1 == fighterId) {
@@ -546,57 +548,69 @@ export function FighterProfile() {
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <h2 className="text-2xl font-bold mb-6 border-b pb-2">Fight History</h2>
                 <div className="space-y-6">
-                {fights.map((fight, index) => {
-                  console.log(fight)
+                  {(showAllFights ? fights : fights.slice(0, 3)).map((fight, index) => {
+                    // console.log(fight)
 
-                  let opponent; // Declare the variable outside the if-else block
+                    let opponent; // Declare the variable outside the if-else block
 
-                  if (fight.current_fighter_role == "fighter_1") {
-                    opponent = opponents.find((opponent) => opponent.id == fight.id_fighter_2); // Assign to the outer variable
-                  } else {
-                    opponent = opponents.find((opponent) => opponent.id == fight.id_fighter_1); // Assign to the outer variable
-                  }
+                    if (fight.current_fighter_role == "fighter_1") {
+                      opponent = opponents.find((opponent) => opponent.id == fight.id_fighter_2); // Assign to the outer variable
+                    } else {
+                      opponent = opponents.find((opponent) => opponent.id == fight.id_fighter_1); // Assign to the outer variable
+                    }
 
-                  return (
-                    <div key={index} className="border-b last:border-b-0 pb-4 last:pb-0">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center">
-                          <div className={`w-16 h-16 rounded-full flex items-center justify-center mr-4 ${
-                            fight.result === 'win' ? 'bg-green-100 text-green-600' : 
-                            fight.result === 'loss' ? 'bg-red-100 text-red-600' : 
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            <span className="font-bold uppercase">{
-                              fight.result === 'win' ? 'W' : 
-                              fight.result === 'loss' ? 'L' : 
-                              fight.result === 'draw' ? 'D' : 'NC'
-                            }</span>
-                          </div>
-                          <div>
-                            <div className="flex items-center">
-                              <span className="font-medium">vs. {opponent?.name}</span> {/* Use the variable here */}
-                              {opponent?.small_img_url && (
-                                <img 
-                                  src={opponent.small_img_url} 
-                                  alt={opponent.name}
-                                  className="w-6 h-6 rounded-full ml-2 object-cover"
-                                />
-                              )}
+                    return (
+                      <div key={index} className="border-b last:border-b-0 pb-4 last:pb-0">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-center">
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mr-4 ${
+                              fight.result === 'win' ? 'bg-green-100 text-green-600' : 
+                              fight.result === 'loss' ? 'bg-red-100 text-red-600' : 
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              <span className="font-bold uppercase">{
+                                fight.result === 'win' ? 'W' : 
+                                fight.result === 'loss' ? 'L' : 
+                                fight.result === 'draw' ? 'D' : 'NC'
+                              }</span>
                             </div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              {new Date(`${fight.month_day}, ${fight.year}`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            <div>
+                              <div className="flex items-center">
+                                <span className="font-medium">vs. {opponent?.name}</span> {/* Use the variable here */}
+                                {opponent?.small_img_url && (
+                                  <img 
+                                    src={opponent.small_img_url} 
+                                    alt={opponent.name}
+                                    className="w-6 h-6 rounded-full ml-2 object-cover"
+                                  />
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                {new Date(`${fight.month_day}, ${fight.year}`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        
-                        <div className="md:text-right">
-                          <div className="text-sm text-gray-600">{fight.id_event}</div>
+                          
+                          <div className="md:text-right">
+                            <div className="text-sm text-gray-600">{fight.id_event}</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
                 </div>
+                
+                {/* Show More/Show Less Button */}
+                {fights.length > 3 && (
+                  <div className="mt-6 text-center">
+                    <button
+                      onClick={() => setShowAllFights(!showAllFights)}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                    >
+                      {showAllFights ? 'Show Less' : 'See More'}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -732,74 +746,6 @@ export function FighterProfile() {
     )}
   </div>
   );
-}
-
-// Helper function to generate mock fight history if not provided
-function generateMockFightHistory(fighter: Fighter): FightHistoryItem[] {
-  // const recordParts = fighter.record.split('-');
-  const recordParts = ['0', '5']
-  const wins = parseInt(recordParts[0]);
-  const losses = parseInt(recordParts[1]);
-  const draws = parseInt(recordParts[2]);
-  const totalFights = wins + losses + draws;
-  
-  const methods = [
-    'KO/TKO (Punches)',
-    'KO/TKO (Head Kick)',
-    'Submission (Rear-Naked Choke)',
-    'Submission (Armbar)',
-    'Unanimous Decision',
-    'Split Decision'
-  ];
-  
-  const events = [
-    'UFC 276',
-    'UFC Fight Night: Vegas',
-    'UFC 265',
-    'UFC 259',
-    'UFC Fight Night: London'
-  ];
-  
-  const opponents = [
-    'Alex Johnson',
-    'Mike Thompson',
-    'Carlos Silva',
-    'James Wilson',
-    'Robert Lee'
-  ];
-  
-  const history: FightHistoryItem[] = [];
-  
-  // Create recent fights (last 5 or less)
-  const recentFightsCount = Math.min(totalFights, 5);
-  
-  for (let i = 0; i < recentFightsCount; i++) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - (i * 4)); // Each fight roughly 4 months apart
-    
-    let result: 'win' | 'loss' | 'draw' | 'nc';
-    if (i < wins) {
-      result = 'win';
-    } else if (i < wins + losses) {
-      result = 'loss';
-    } else {
-      result = 'draw';
-    }
-    
-    history.push({
-      id: `fight-${i + 1}`,
-      date: date.toISOString(),
-      opponent: opponents[i % opponents.length],
-      opponentImageUrl: `https://images.unsplash.com/photo-1594381898411-846e7d193883?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80&id=${i}`,
-      result,
-      method: methods[Math.floor(Math.random() * methods.length)],
-      round: Math.floor(Math.random() * 3) + 1,
-      time: `${Math.floor(Math.random() * 5)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-      event: events[i % events.length]
-    });
-  }
-  
-  return history;
 }
 
 // Helper function to generate mock titles if not provided

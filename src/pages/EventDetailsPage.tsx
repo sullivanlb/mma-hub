@@ -67,36 +67,6 @@ export function EventDetails() {
     }
   }
 
-  function formatDateTimeToET(isoString: string): string {
-    const date = new Date(isoString);
-    
-    // Format to Eastern Time (ET)
-    const options: Intl.DateTimeFormatOptions = {
-      timeZone: 'America/New_York',
-      weekday: 'long',       // e.g., "Saturday"
-      month: '2-digit',      // e.g., "03"
-      day: '2-digit',        // e.g., "29"
-      year: 'numeric',       // e.g., "2025"
-      hour: '2-digit',       // e.g., "04"
-      minute: '2-digit',     // e.g., "00"
-      hour12: true           // AM/PM format
-    };
-  
-    const formatter = new Intl.DateTimeFormat('en-US', options);
-    const parts = formatter.formatToParts(date);
-  
-    // Extract parts
-    const weekday = parts.find(p => p.type === 'weekday')?.value;
-    const month = parts.find(p => p.type === 'month')?.value;
-    const day = parts.find(p => p.type === 'day')?.value;
-    const year = parts.find(p => p.type === 'year')?.value;
-    const hour = parts.find(p => p.type === 'hour')?.value;
-    const minute = parts.find(p => p.type === 'minute')?.value;
-    const dayPeriod = parts.find(p => p.type === 'dayPeriod')?.value;
-  
-    return `${weekday} ${month}.${day}.${year} at ${hour}:${minute} ${dayPeriod} ET`;
-  }
-
   type ColorMap = {
     [key in FightResult]: string;
   } & {
@@ -141,29 +111,46 @@ export function EventDetails() {
   return (
     <div className="min-h-screen bg-gray-100 pb-8">
       {/* Hero Section */}
-      <div className="relative h-96 mb-8">
-        <img
-          src={event?.img_url}
-          alt={event?.name}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-end pb-8">
-            <div className="text-white">
-              <h1 className="text-4xl font-bold mb-4">{event?.name}</h1>
-              <div className="flex flex-wrap gap-6">
-                <div className="flex items-center">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  <span>{event && format(new Date(event.datetime), 'PPP')}</span>
+      <div className="relative bg-gray-900 mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Flyer à gauche */}
+            <div className="flex justify-center lg:justify-start">
+              <div className="relative max-w-sm">
+                <img
+                  src={event?.img_url}
+                  alt={event?.name}
+                  className="w-full h-auto rounded-lg shadow-2xl"
+                />
+              </div>
+            </div>
+            
+            {/* Informations à droite */}
+            <div className="text-white text-center lg:text-left">
+              <h1 className="text-4xl lg:text-5xl font-bold mb-6">{event?.name}</h1>
+              <div className="space-y-4">
+                <div className="flex items-center justify-center lg:justify-start">
+                  <Calendar className="w-6 h-6 mr-3 text-red-500" />
+                  <span className="text-lg">{event && format(new Date(event.datetime), 'PPP')}</span>
                 </div>
-                <div className="flex items-center">
-                  <MapPin className="w-5 h-5 mr-2" />
-                  <span>{event?.venue}, {event?.location}</span>
+                <div className="flex items-center justify-center lg:justify-start">
+                  <MapPin className="w-6 h-6 mr-3 text-red-500" />
+                  <span className="text-lg">{event?.venue}, {event?.location}</span>
                 </div>
-                <div className="flex items-center">
-                  <Tv className="w-5 h-5 mr-2" />
-                  <span>{event?.broadcast}</span>
+                <div className="flex items-center justify-center lg:justify-start">
+                  <Tv className="w-6 h-6 mr-3 text-red-500" />
+                  <span className="text-lg">{event?.broadcast}</span>
                 </div>
+              </div>
+              
+              {/* Boutons d'action */}
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                  Buy Tickets
+                </button>
+                <button className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-3 rounded-lg font-semibold transition-colors">
+                  Watch Trailer
+                </button>
               </div>
             </div>
           </div>
@@ -273,6 +260,9 @@ export function EventDetails() {
                 ))}
               </div>
             </div>
+
+
+
           </div>
 
           {/* Sidebar */}
@@ -329,6 +319,64 @@ export function EventDetails() {
                 Share Event
               </button>
             </div>
+
+            {/* Share poster */}
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Official Event Poster</h2>
+                <p className="text-gray-600">Share the official poster on social media</p>
+              </div>
+              
+              <div className="flex justify-center">
+                <div className="relative group max-w-sm">
+                  <img
+                    src={event?.img_url}
+                    alt={`${event?.name} Official Poster`}
+                    className="w-full h-auto rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:scale-[1.02]"
+                  />
+                  
+                  {/* Overlay avec boutons */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 rounded-xl flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                      <div className="flex flex-col gap-3">
+                        <button className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-gray-100 transition-all flex items-center">
+                          <Share2 className="w-4 h-4 mr-2" />
+                          Share Poster
+                        </button>
+                        <button className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-red-700 transition-all flex items-center">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Download HD
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Boutons de partage social */}
+              <div className="mt-8 flex justify-center">
+                <div className="flex gap-4">
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full transition-colors">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                    </svg>
+                  </button>
+                  <button className="bg-blue-800 hover:bg-blue-900 text-white p-3 rounded-full transition-colors">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </button>
+                  <button className="bg-pink-600 hover:bg-pink-700 text-white p-3 rounded-full transition-colors">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.746.099.12.112.225.085.347-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.744-1.378l-.628 2.378c-.226.869-.835 1.958-1.244 2.621.937.29 1.931.444 2.966.444 6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
